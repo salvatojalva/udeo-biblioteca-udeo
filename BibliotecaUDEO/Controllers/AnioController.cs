@@ -30,7 +30,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Anio/5
-        //[Authorize]
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<Anio>> GetAnio(int id)
         {
