@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -21,6 +22,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Editorial
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Editorial>>> GetEditorials()
         {
@@ -28,6 +30,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Editorial/5
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<Editorial>> GetEditorial(int id)
         {
@@ -41,8 +44,24 @@ namespace BibliotecaUDEO.Controllers
             return editorial;
         }
 
+        // GET: api/Editorial/SearchByName/{SearchString: string}
+        [Authorize]
+        [HttpGet("SearchByName/{SearchString}")]
+        public async Task<ActionResult<IEnumerable<Editorial>>> GetByName(string SearchString)
+        {
+            var item = from m in _context.Editorials
+                       select m;
+            if (!string.IsNullOrEmpty(SearchString))
+            {
+                item = item.Where(s => s.Nombre.Contains(SearchString));
+            }
+
+            return await item.ToListAsync();
+        }
+
         // PUT: api/Editorial/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEditorial(int id, Editorial editorial)
         {
@@ -74,6 +93,7 @@ namespace BibliotecaUDEO.Controllers
 
         // POST: api/Editorial
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<Editorial>> PostEditorial(Editorial editorial)
         {
@@ -98,6 +118,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // DELETE: api/Editorial/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEditorial(int id)
         {

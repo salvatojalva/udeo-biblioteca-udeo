@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -21,6 +22,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/AutorDocumento
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AutorDocumento>>> GetAutorDocumentos()
         {
@@ -28,6 +30,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/AutorDocumento/5
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<AutorDocumento>> GetAutorDocumento(int id)
         {
@@ -43,6 +46,7 @@ namespace BibliotecaUDEO.Controllers
 
         // PUT: api/AutorDocumento/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAutorDocumento(int id, AutorDocumento autorDocumento)
         {
@@ -74,6 +78,7 @@ namespace BibliotecaUDEO.Controllers
 
         // POST: api/AutorDocumento
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<AutorDocumento>> PostAutorDocumento(AutorDocumento autorDocumento)
         {
@@ -84,6 +89,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // DELETE: api/AutorDocumento/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAutorDocumento(int id)
         {

@@ -30,7 +30,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Anio/5
-        [Authorize]
+        //[Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<Anio>> GetAnio(int id)
         {
@@ -43,6 +43,22 @@ namespace BibliotecaUDEO.Controllers
 
             return anio;
         }
+
+        // GET: api/Anio/SearchByName/{SearchString: string}
+        [Authorize]
+        [HttpGet("SearchByName/{SearchString}")]
+        public async Task<ActionResult<IEnumerable<Anio>>> GetAnioByName(string SearchString)
+        {
+            var anios = from m in _context.Anios
+                         select m;
+            if (!string.IsNullOrEmpty(SearchString))
+            {
+                anios = anios.Where(s => s.Nombre.Contains(SearchString));
+            }
+
+            return await anios.ToListAsync();
+        }
+
 
         // PUT: api/Anio/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

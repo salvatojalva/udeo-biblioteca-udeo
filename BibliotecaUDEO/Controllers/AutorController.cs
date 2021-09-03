@@ -44,6 +44,21 @@ namespace BibliotecaUDEO.Controllers
             return autor;
         }
 
+        // GET: api/Autor/SearchByName/{SearchString: string}
+        [Authorize]
+        [HttpGet("SearchByName/{SearchString}")]
+        public async Task<ActionResult<IEnumerable<Autor>>> GetAutorByName(string SearchString)
+        {
+            var item = from m in _context.Autors
+                        select m;
+            if (!string.IsNullOrEmpty(SearchString))
+            {
+                item = item.Where(s => s.Nombre.Contains(SearchString));
+            }
+
+            return await item.ToListAsync();
+        }
+
         // PUT: api/Autor/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -21,6 +22,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Tag
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Tag>>> GetTags()
         {
@@ -28,6 +30,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Tag/5
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<Tag>> GetTag(int id)
         {
@@ -41,8 +44,24 @@ namespace BibliotecaUDEO.Controllers
             return tag;
         }
 
+        // GET: api/Tag/SearchByName/{SearchString: string}
+        [Authorize]
+        [HttpGet("SearchByName/{SearchString}")]
+        public async Task<ActionResult<IEnumerable<Tag>>> GetByName(string SearchString)
+        {
+            var item = from m in _context.Tags
+                       select m;
+            if (!string.IsNullOrEmpty(SearchString))
+            {
+                item = item.Where(s => s.Nombre.Contains(SearchString));
+            }
+
+            return await item.ToListAsync();
+        }
+
         // PUT: api/Tag/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTag(int id, Tag tag)
         {
@@ -74,6 +93,7 @@ namespace BibliotecaUDEO.Controllers
 
         // POST: api/Tag
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<Tag>> PostTag(Tag tag)
         {
@@ -84,6 +104,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // DELETE: api/Tag/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTag(int id)
         {
