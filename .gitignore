@@ -403,3 +403,8 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+.github/workflows/BibliotecaUDEO.yml
+BibliotecaUDEO/.config/dotnet-tools.json
+BibliotecaUDEO/Properties/serviceDependencies.json
+BibliotecaUDEO/Properties/serviceDependencies.local.json
+BibliotecaUDEO/Properties/ServiceDependencies/BibliotecaUDEO/profile.arm.json
