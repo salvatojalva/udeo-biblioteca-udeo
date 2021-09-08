@@ -27,7 +27,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("StoreUsuario")]
         public async Task<ActionResult<Usuario>> PostUserFormData([FromForm] UsuarioFormData objarch)
         {
             
