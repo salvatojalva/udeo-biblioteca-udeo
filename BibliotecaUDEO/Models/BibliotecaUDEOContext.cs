@@ -406,6 +406,11 @@ namespace BibliotecaUDEO.Models
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("rol");
+
+                entity.Property(e => e.Image)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("image");
             });
 
             OnModelCreatingPartial(modelBuilder);

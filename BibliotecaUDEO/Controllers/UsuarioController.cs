@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -15,10 +17,70 @@ namespace BibliotecaUDEO.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly BibliotecaUDEOContext _context;
+        public static IWebHostEnvironment _environment;
 
-        public UsuarioController(BibliotecaUDEOContext context)
+        public UsuarioController(BibliotecaUDEOContext context, IWebHostEnvironment environment)
         {
             _context = context;
+
+            _environment = environment;
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult<Usuario>> PostUserFormData([FromForm] UsuarioFormData objarch)
+        {
+            
+                string endpointimagen;
+                
+                endpointimagen = "";
+
+                if (objarch.archivo.Length > 0)
+                {
+                    
+                    if (!Directory.Exists(_environment.WebRootPath + "\\Subir\\"))
+                    {
+                        Directory.CreateDirectory(_environment.WebRootPath + "\\Subir\\");
+                    }
+
+                    string[] formatosadmitidos = { ".PNG", ".JPG", ".PDF" };
+
+                    string FormatoArchivo = Path.GetExtension(objarch.archivo.FileName).ToUpper();
+
+                    if (formatosadmitidos.Contains(FormatoArchivo))
+                    {
+
+                        var filpath = _environment.WebRootPath + "\\Subir\\" + objarch.archivo.FileName;
+
+                        using (FileStream fileStream = System.IO.File.Create(filpath))
+                        {
+
+                            objarch.archivo.CopyTo(fileStream);
+                            fileStream.Flush();
+
+                            endpointimagen = "https://localhost:5001/Subir/" + objarch.archivo.FileName;
+
+
+
+                        }
+
+                    }
+
+                }
+                
+                Usuario user = new Usuario();
+
+                user.Nombre = "Nombre 1";
+                user.Apellido = "Apellido 2";
+                user.GoogleId = "asdf2f323f232f3";
+                user.Activo = true;
+                user.Rol = "admin";
+                user.Image = endpointimagen;
+
+                _context.Usuarios.Add(user);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetUsuario", new { id = user.Id }, user);
         }
 
         // GET: api/Usuario
@@ -109,5 +171,11 @@ namespace BibliotecaUDEO.Controllers
         {
             return _context.Usuarios.Any(e => e.Id == id);
         }
+    }
+
+    public class UsuarioFormData
+    {
+        public IFormFile archivo { get; set; }
+        public IFormFile nombre { get; set; }
     }
 }

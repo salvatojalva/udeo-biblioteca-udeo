@@ -108,6 +108,8 @@ namespace BibliotecaUDEO
                 endpoints.MapControllers();
             });
 
+            app.UseStaticFiles();
+
         }
 
         private const string PUBLIC_KEY = @"MIICCgKCAgEAtCR2Pii+q9C76P2E9ydHYxnBPjJFGT7MvHuQPKpcS9RImfrkobt0
