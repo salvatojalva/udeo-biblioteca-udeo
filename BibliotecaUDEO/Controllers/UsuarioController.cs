@@ -28,39 +28,37 @@ namespace BibliotecaUDEO.Controllers
 
 
         [HttpPost("StoreUsuario")]
-        public async Task<ActionResult<Usuario>> PostUserFormData([FromForm] UsuarioFormData objarch)
+        public async Task<ActionResult<Usuario>> PostUserFormData([FromForm] UsuarioFormData userFormData)
         {
             
                 string endpointimagen;
                 
                 endpointimagen = "";
 
-                if (objarch.archivo.Length > 0)
+                if (userFormData.archivo.Length > 0)
                 {
                     
-                    if (!Directory.Exists(_environment.WebRootPath + "\\Subir\\"))
+                    if (!Directory.Exists(_environment.WebRootPath + "\\Uplods\\"))
                     {
-                        Directory.CreateDirectory(_environment.WebRootPath + "\\Subir\\");
+                        Directory.CreateDirectory(_environment.WebRootPath + "\\Uplods\\");
                     }
 
                     string[] formatosadmitidos = { ".PNG", ".JPG", ".PDF" };
 
-                    string FormatoArchivo = Path.GetExtension(objarch.archivo.FileName).ToUpper();
+                    string FormatoArchivo = Path.GetExtension(userFormData.archivo.FileName).ToUpper();
 
                     if (formatosadmitidos.Contains(FormatoArchivo))
                     {
 
-                        var filpath = _environment.WebRootPath + "\\Subir\\" + objarch.archivo.FileName;
+                        var filpath = _environment.WebRootPath + "\\Uplods\\" + userFormData.archivo.FileName;
 
                         using (FileStream fileStream = System.IO.File.Create(filpath))
                         {
 
-                            objarch.archivo.CopyTo(fileStream);
+                        userFormData.archivo.CopyTo(fileStream);
                             fileStream.Flush();
 
-                            endpointimagen = "https://localhost:5001/Subir/" + objarch.archivo.FileName;
-
-
+                            endpointimagen = userFormData.archivo.FileName;
 
                         }
 
@@ -70,7 +68,7 @@ namespace BibliotecaUDEO.Controllers
                 
                 Usuario user = new Usuario();
 
-                user.Nombre = "Nombre 1";
+                user.Nombre = userFormData.nombre;
                 user.Apellido = "Apellido 2";
                 user.GoogleId = "asdf2f323f232f3";
                 user.Activo = true;
@@ -176,6 +174,6 @@ namespace BibliotecaUDEO.Controllers
     public class UsuarioFormData
     {
         public IFormFile archivo { get; set; }
-        public IFormFile nombre { get; set; }
+        public String nombre { get; set; }
     }
 }
