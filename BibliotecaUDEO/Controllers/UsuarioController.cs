@@ -63,7 +63,7 @@ namespace BibliotecaUDEO.Controllers
                         userFormData.archivo.CopyTo(fileStream);
                         fileStream.Flush();
 
-                        endpointimagen = "http://localhost:5001/Uplods/" + NombreArchivo;
+                        endpointimagen =  NombreArchivo;
 
                     }
 
@@ -89,41 +89,32 @@ namespace BibliotecaUDEO.Controllers
         // GET: api/Usuario
 
         [HttpGet]
-        public async Task<ActionResult> Get([FromQuery]  string fil, int? page, int? records)
+        public async Task<ActionResult> Get([FromQuery]  string filterByName, int? page, int? records)
         {
+            int _page = page ?? 1;
+            int _records = records ?? 2;
+            int total_page;
+            List<Usuario> usuarios = new List<Usuario>();
 
-          
-                int _page = page ?? 1;
-                int _records = records ?? 2;
-
-            if (fil != null)
+            if (filterByName != null)
             {
-                decimal total_records = await _context.Usuarios.Where(x => x.Nombre.Contains(fil)).CountAsync();
-                int total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
-                var usuarios = await _context.Usuarios.Where(x => x.Nombre.Contains(fil)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
-                return Ok(new
-                {
-                    pages = total_page,
-                    records = usuarios,
-                    current_page = _page
-                });
+                decimal total_records = await _context.Usuarios.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                usuarios = await _context.Usuarios.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             else
             {
                 decimal total_records = await _context.Usuarios.CountAsync();
-                int total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
-                var usuarios = await _context.Usuarios.Skip((_page - 1) * _records).Take(_records).ToListAsync();
-                return Ok(new
-                {
-                    pages = total_page,
-                    records = usuarios,
-                    current_page = _page
-                });
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                usuarios = await _context.Usuarios.Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
 
-            
-        
-          //  return await _context.Usuarios.ToListAsync();
+            return Ok(new
+            {
+                pages = total_page,
+                records = usuarios,
+                current_page = _page
+            });
         }
         
 
