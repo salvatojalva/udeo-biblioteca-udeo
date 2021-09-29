@@ -22,7 +22,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Autor
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Autor>>> GetAutors()
         {

@@ -1,16 +1,16 @@
 {
   "dependencies": {
-    "mssql1": {
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/bibliotecaudeodbserver/databases/BibliotecaUDEO_db",
-      "type": "mssql.azure",
-      "connectionId": "ConnectionStrings:BibliotecaDB",
-      "secretStore": "AzureAppSettings"
-    },
     "secrets1": {
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.KeyVault/vaults/BibliotecaUDEOvault",
       "type": "secrets.keyVault",
       "connectionId": "VaultUri",
       "secretStore": "AzureAppSettings"
+    },
+    "mssql1": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/bibliotecaudeodbserver/databases/BibliotecaUDEO_db",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:BibliotecaDB",
+      "secretStore": "AzureKeyVault"
     }
   }
 }
