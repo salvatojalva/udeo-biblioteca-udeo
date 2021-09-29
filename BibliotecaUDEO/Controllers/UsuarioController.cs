@@ -17,6 +17,7 @@ namespace BibliotecaUDEO.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly BibliotecaUDEOContext _context;
+        //private readonly int records = 2;
         public static IWebHostEnvironment _environment;
 
         public UsuarioController(BibliotecaUDEOContext context, IWebHostEnvironment environment)
@@ -25,69 +26,97 @@ namespace BibliotecaUDEO.Controllers
 
             _environment = environment;
         }
-
-
         [HttpPost("StoreUsuario")]
         public async Task<ActionResult<Usuario>> PostUserFormData([FromForm] UsuarioFormData userFormData)
         {
-            
-                string endpointimagen;
-                
-                endpointimagen = "";
 
-                if (userFormData.archivo.Length > 0)
+            string endpointimagen;
+
+            endpointimagen = "";
+
+            if (userFormData.archivo.Length > 0)
+            {
+
+                if (!Directory.Exists(_environment.WebRootPath + "\\Uplods\\"))
                 {
-                    
-                    if (!Directory.Exists(_environment.WebRootPath + "\\Uplods\\"))
+                    Directory.CreateDirectory(_environment.WebRootPath + "\\Uplods\\");
+                }
+
+                DateTime foo = DateTime.Now;
+                long unixTime = ((DateTimeOffset)foo).ToUnixTimeSeconds();
+
+                string[] formatosadmitidos = { ".PNG", ".JPG", ".PDF" };
+
+                string FormatoArchivo = Path.GetExtension(userFormData.archivo.FileName).ToUpper();
+
+                if (formatosadmitidos.Contains(FormatoArchivo))
+                {
+
+                    string NombreArchivo = userFormData.archivo.FileName;
+                    NombreArchivo = Convert.ToString(unixTime) + FormatoArchivo;
+
+                    var filpath = _environment.WebRootPath + "\\Uplods\\" + NombreArchivo;
+
+                    using (FileStream fileStream = System.IO.File.Create(filpath))
                     {
-                        Directory.CreateDirectory(_environment.WebRootPath + "\\Uplods\\");
-                    }
-
-                    string[] formatosadmitidos = { ".PNG", ".JPG", ".PDF" };
-
-                    string FormatoArchivo = Path.GetExtension(userFormData.archivo.FileName).ToUpper();
-
-                    if (formatosadmitidos.Contains(FormatoArchivo))
-                    {
-
-                        var filpath = _environment.WebRootPath + "\\Uplods\\" + userFormData.archivo.FileName;
-
-                        using (FileStream fileStream = System.IO.File.Create(filpath))
-                        {
 
                         userFormData.archivo.CopyTo(fileStream);
-                            fileStream.Flush();
+                        fileStream.Flush();
 
-                            endpointimagen = userFormData.archivo.FileName;
-
-                        }
+                        endpointimagen =  NombreArchivo;
 
                     }
 
                 }
-                
-                Usuario user = new Usuario();
 
-                user.Nombre = userFormData.nombre;
-                user.Apellido = "Apellido 2";
-                user.GoogleId = "asdf2f323f232f3";
-                user.Activo = true;
-                user.Rol = "admin";
-                user.Image = endpointimagen;
+            }
 
-                _context.Usuarios.Add(user);
-                await _context.SaveChangesAsync();
+            Usuario user = new Usuario();
 
-                return CreatedAtAction("GetUsuario", new { id = user.Id }, user);
+            user.Nombre = userFormData.nombre;
+            user.Apellido = userFormData.apellido;
+            user.GoogleId = userFormData.googleId;
+            user.Activo = true;
+            user.Rol = userFormData.rol;
+            user.Image = endpointimagen;
+
+            _context.Usuarios.Add(user);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetUsuario", new { id = user.Id }, user);
         }
 
         // GET: api/Usuario
-        [Authorize]
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        public async Task<ActionResult> Get([FromQuery]  string filterByName, int? page, int? records)
         {
-            return await _context.Usuarios.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 2;
+            int total_page;
+            List<Usuario> usuarios = new List<Usuario>();
+
+            if (filterByName != null)
+            {
+                decimal total_records = await _context.Usuarios.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                usuarios = await _context.Usuarios.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.Usuarios.CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                usuarios = await _context.Usuarios.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+
+            return Ok(new
+            {
+                pages = total_page,
+                records = usuarios,
+                current_page = _page
+            });
         }
+        
 
         // GET: api/Usuario/5
         [Authorize]
@@ -175,5 +204,9 @@ namespace BibliotecaUDEO.Controllers
     {
         public IFormFile archivo { get; set; }
         public String nombre { get; set; }
+        public String apellido { get; set; }
+        public String googleId { get; set; }
+        public String rol { get; set; }
+ 
     }
 }
