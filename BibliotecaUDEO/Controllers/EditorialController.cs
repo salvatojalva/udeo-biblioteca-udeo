@@ -24,9 +24,31 @@ namespace BibliotecaUDEO.Controllers
         // GET: api/Editorial
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Editorial>>> GetEditorials()
+        public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records)
         {
-            return await _context.Editorials.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 10;
+            int total_page;
+            List<Editorial> editorial = new List<Editorial>();
+
+            if (filterByName != null)
+            {
+                decimal total_records = await _context.Editorials.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                editorial = await _context.Editorials.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.Editorials.CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                editorial = await _context.Editorials.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            return Ok(new
+            {
+                pages = total_page,
+                records = editorial,
+                current_page = _page
+            });
         }
 
         // GET: api/Editorial/5

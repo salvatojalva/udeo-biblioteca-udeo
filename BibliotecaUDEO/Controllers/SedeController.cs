@@ -24,9 +24,31 @@ namespace BibliotecaUDEO.Controllers
         // GET: api/Sede
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Sede>>> GetSedes()
+        public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records)
         {
-            return await _context.Sedes.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 10;
+            int total_page;
+            List<Sede> sede = new List<Sede>();
+
+            if (filterByName != null)
+            {
+                decimal total_records = await _context.Sedes.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+               sede = await _context.Sedes.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.Sedes.CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                sede = await _context.Sedes.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            return Ok(new
+            {
+                pages = total_page,
+                records = sede,
+                current_page = _page
+            });
         }
 
         // GET: api/Sede/5

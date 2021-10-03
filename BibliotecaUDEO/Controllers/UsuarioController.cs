@@ -92,7 +92,7 @@ namespace BibliotecaUDEO.Controllers
         public async Task<ActionResult> Get([FromQuery]  string filterByName, int? page, int? records)
         {
             int _page = page ?? 1;
-            int _records = records ?? 2;
+            int _records = records ?? 10;
             int total_page;
             List<Usuario> usuarios = new List<Usuario>();
 
