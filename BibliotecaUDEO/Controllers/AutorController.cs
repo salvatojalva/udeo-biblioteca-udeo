@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -16,18 +18,45 @@ namespace BibliotecaUDEO.Controllers
     {
         private readonly BibliotecaUDEOContext _context;
 
-        public AutorController(BibliotecaUDEOContext context)
+        public static IWebHostEnvironment _environment;
+
+        public AutorController(BibliotecaUDEOContext context, IWebHostEnvironment environment)
         {
             _context = context;
+
+            _environment = environment;
         }
 
-        // GET: api/Autor
-        //[Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Autor>>> GetAutors()
+        public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records)
         {
-            return await _context.Autors.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 2;
+            int total_page;
+            List<Autor> autores = new List<Autor>();
+
+            if (filterByName != null)
+            {
+                decimal total_records = await _context.Autors.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                autores = await _context.Autors.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.Autors.CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                autores = await _context.Autors.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+
+            return Ok(new
+            {
+                pages = total_page,
+                records = autores,
+                current_page = _page
+            });
         }
+
+        
 
         // GET: api/Autor/5
         [Authorize]
