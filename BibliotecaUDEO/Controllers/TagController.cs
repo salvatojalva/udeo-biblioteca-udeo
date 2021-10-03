@@ -24,9 +24,34 @@ namespace BibliotecaUDEO.Controllers
         // GET: api/Tag
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tag>>> GetTags()
+        public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records) 
         {
-            return await _context.Tags.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 10;
+            int total_page;
+            List<Tag> tag = new List<Tag>();
+
+            if (filterByName!=null)
+            {
+                decimal total_records = await _context.Tags.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                tag = await _context.Tags.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+
+            }
+            else
+            {
+                decimal total_records = await _context.Tags.CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                tag = await _context.Tags.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+
+            return Ok(new
+            {
+                pages = total_page,
+                records = tag,
+                current_page = _page
+            });
+
         }
 
         // GET: api/Tag/5
