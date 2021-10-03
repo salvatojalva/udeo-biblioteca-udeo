@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -16,17 +18,42 @@ namespace BibliotecaUDEO.Controllers
     {
         private readonly BibliotecaUDEOContext _context;
 
-        public CategoriaController(BibliotecaUDEOContext context)
+        public static IWebHostEnvironment _environment;
+
+        public CategoriaController(BibliotecaUDEOContext context, IWebHostEnvironment environment)
         {
             _context = context;
+
+            _environment = environment;
         }
 
-        // GET: api/Categoria
-        [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Categorium>>> GetCategoria()
+        public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records)
         {
-            return await _context.Categoria.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 2;
+            int total_page;
+            List<CategoriaController> categorias = new List<CategoriaController>();
+
+            if (filterByName != null)
+            {
+                decimal total_records = await _context.Categoria.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                categorias = await _context.Categoria.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.Categoria.CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                categorias = await _context.Categoria.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+
+            return Ok(new
+            {
+                pages = total_page,
+                records = categorias,
+                current_page = _page
+            });
         }
 
         // GET: api/Categoria/5

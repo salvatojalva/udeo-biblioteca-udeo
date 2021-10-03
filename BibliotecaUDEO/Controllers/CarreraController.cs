@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -16,17 +18,42 @@ namespace BibliotecaUDEO.Controllers
     {
         private readonly BibliotecaUDEOContext _context;
 
-        public CarreraController(BibliotecaUDEOContext context)
+        public static IWebHostEnvironment _environment;
+
+        public CarreraController(BibliotecaUDEOContext context, IWebHostEnvironment environment)
         {
             _context = context;
+
+            _environment = environment;
         }
 
-        // GET: api/Carrera
-        [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Carrera>>> GetCarreras()
+        public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records)
         {
-            return await _context.Carreras.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 2;
+            int total_page;
+            List<Carrera> carreras = new List<Carrera>();
+
+            if (filterByName != null)
+            {
+                decimal total_records = await _context.Carreras.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                carreras = await _context.Carreras.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.Carreras.CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                carreras = await _context.Carreras.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+
+            return Ok(new
+            {
+                pages = total_page,
+                records = carreras,
+                current_page = _page
+            });
         }
 
         // GET: api/Carrera/5
