@@ -1,8 +1,13 @@
 {
   "dependencies": {
+    "identityapp1": {
+      "type": "identityapp",
+      "connectionId": "",
+      "suggestion": "true",
+      "ignored": "true"
+    },
     "secrets1": {
-      "type": "secrets",
-      "connectionId": "VaultUri"
+      "type": "secrets"
     },
     "mssql1": {
       "type": "mssql",

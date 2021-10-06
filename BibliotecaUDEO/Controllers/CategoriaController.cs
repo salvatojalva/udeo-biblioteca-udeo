@@ -33,24 +33,27 @@ namespace BibliotecaUDEO.Controllers
             int _page = page ?? 1;
             int _records = records ?? 2;
             int total_page;
-            List<CategoriaController> categorias = new List<CategoriaController>();
+            int totalCount;
+            List<Categorium> categorias = new List<Categorium>();
 
             if (filterByName != null)
             {
                 decimal total_records = await _context.Categoria.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 categorias = await _context.Categoria.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             else
             {
                 decimal total_records = await _context.Categoria.CountAsync();
+                totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 categorias = await _context.Categoria.Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
 
             return Ok(new
             {
-                pages = total_page,
+                totalCount = totalCount,
                 records = categorias,
                 current_page = _page
             });

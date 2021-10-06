@@ -29,11 +29,13 @@ namespace BibliotecaUDEO.Controllers
             int _page = page ?? 1;
             int _records = records ?? 10;
             int total_page;
+            int totalCount;
             List<Tag> tag = new List<Tag>();
 
             if (filterByName!=null)
             {
                 decimal total_records = await _context.Tags.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 tag = await _context.Tags.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
 
@@ -41,13 +43,14 @@ namespace BibliotecaUDEO.Controllers
             else
             {
                 decimal total_records = await _context.Tags.CountAsync();
+                totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 tag = await _context.Tags.Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
 
             return Ok(new
             {
-                pages = total_page,
+                totalCount = totalCount,
                 records = tag,
                 current_page = _page
             });

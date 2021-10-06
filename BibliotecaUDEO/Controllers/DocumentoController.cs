@@ -29,22 +29,25 @@ namespace BibliotecaUDEO.Controllers
             int _page = page ?? 1;
             int _records = records ?? 10;
             int total_page;
+            int totalCount;
             List<Documento> documento = new List<Documento>();
             if (filterByTitle != null)
             {
                 decimal total_records = await _context.Documentos.Where(x => x.Titulo.Contains(filterByTitle)).CountAsync();
+                totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 documento = await _context.Documentos.Where(x => x.Titulo.Contains(filterByTitle)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             else
             {
                 decimal total_records = await _context.Documentos.CountAsync();
+                totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 documento = await _context.Documentos.Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             return Ok(new
             {
-                pages = total_page,
+                totalCount = totalCount,
                 records = documento,
                 current_page = _page
             });

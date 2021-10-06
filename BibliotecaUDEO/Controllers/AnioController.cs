@@ -30,29 +30,33 @@ namespace BibliotecaUDEO.Controllers
         public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records)
         {
             int _page = page ?? 1;
-            int _records = records ?? 2;
+            int _records = records ?? 7;
             int total_page;
+            int totalCount;
             List<Anio> anio = new List<Anio>();
 
             if (filterByName != null)
             {
                 decimal total_records = await _context.Anios.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 anio = await _context.Anios.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             else
             {
                 decimal total_records = await _context.Anios.CountAsync();
+                totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 anio = await _context.Anios.Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
 
             return Ok(new
             {
-                pages = total_page,
+                totalCount = totalCount,
                 records = anio,
                 current_page = _page
             });
+
         }
 
 

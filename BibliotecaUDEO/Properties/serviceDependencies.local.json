@@ -4,7 +4,7 @@
       "type": "secrets.user"
     },
     "mssql1": {
-      "type": "mssql.azure",
+      "type": "mssql.onprem",
       "connectionId": "ConnectionStrings:BibliotecaDB",
       "secretStore": "LocalSecretsFile"
     }
