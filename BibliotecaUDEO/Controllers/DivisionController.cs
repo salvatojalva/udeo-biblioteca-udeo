@@ -22,11 +22,36 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Division
-        [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Division>>> GetDivisions()
+        public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records) 
         {
-            return await _context.Divisions.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 7;
+            int total_page;
+            int totalCount;
+            List<Division> division = new List<Division>();
+
+            if (filterByName != null)
+            {
+                decimal total_records = await _context.Divisions.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                division= await _context.Divisions.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.Divisions.CountAsync();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                division = await _context.Divisions.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+
+            return Ok(new
+            {
+                totalCount = totalCount,
+                records = division,
+                current_page = _page
+            });
         }
 
         // GET: api/Division/5
