@@ -45,7 +45,6 @@ namespace BibliotecaUDEO.Controllers
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
                 division = await _context.Divisions.Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
-
             return Ok(new
             {
                 totalCount = totalCount,

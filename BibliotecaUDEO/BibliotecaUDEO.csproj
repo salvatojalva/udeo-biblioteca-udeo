@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>b3c42ddc-a038-4b89-94d8-12562aa765f0</UserSecretsId>
   </PropertyGroup>
 
 

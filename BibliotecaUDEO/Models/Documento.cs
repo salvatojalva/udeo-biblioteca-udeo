@@ -15,7 +15,7 @@ namespace BibliotecaUDEO.Models
         }
 
         public int Id { get; set; }
-        public int EditorialId { get; set; }
+        public int? EditorialId { get; set; }
         public string Codigo { get; set; }
         public string Titulo { get; set; }
         public DateTime Creado { get; set; }
