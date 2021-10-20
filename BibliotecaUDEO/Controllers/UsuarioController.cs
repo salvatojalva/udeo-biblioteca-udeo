@@ -17,19 +17,16 @@ namespace BibliotecaUDEO.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly BibliotecaUDEOContext _context;
-        //private readonly int records = 2;
         public static IWebHostEnvironment _environment;
 
         public UsuarioController(BibliotecaUDEOContext context, IWebHostEnvironment environment)
         {
             _context = context;
-
             _environment = environment;
         }
         [HttpPost("StoreUsuario")]
         public async Task<ActionResult<Usuario>> PostUserFormData([FromForm] UsuarioFormData userFormData)
         {
-
             string endpointimagen;
 
             endpointimagen = "";
