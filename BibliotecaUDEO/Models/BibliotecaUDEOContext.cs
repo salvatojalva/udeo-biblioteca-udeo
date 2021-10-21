@@ -139,6 +139,8 @@ namespace BibliotecaUDEO.Models
             {
                 entity.ToTable("Documento");
 
+                entity.HasIndex(e => e.EditorialId, "fkIdx_186");
+
                 entity.HasIndex(e => e.AnioId, "fkIdx_22");
 
                 entity.HasIndex(e => e.CategoriaId, "fkIdx_29");
@@ -149,7 +151,9 @@ namespace BibliotecaUDEO.Models
 
                 entity.HasIndex(e => e.CarreraId, "fkIdx_54");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
 
                 entity.Property(e => e.AnioId).HasColumnName("anio_id");
 
@@ -168,6 +172,8 @@ namespace BibliotecaUDEO.Models
                     .HasColumnName("creado");
 
                 entity.Property(e => e.DivisionId).HasColumnName("division_id");
+
+                entity.Property(e => e.EditorialId).HasColumnName("editorial_id");
 
                 entity.Property(e => e.Image)
                     .IsRequired()
@@ -208,6 +214,12 @@ namespace BibliotecaUDEO.Models
                     .HasForeignKey(d => d.DivisionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_35");
+
+                entity.HasOne(d => d.Editorial)
+                    .WithMany(p => p.Documentos)
+                    .HasForeignKey(d => d.EditorialId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_185");
 
                 entity.HasOne(d => d.TipoDocumento)
                     .WithMany(p => p.Documentos)
@@ -259,7 +271,7 @@ namespace BibliotecaUDEO.Models
                 entity.ToTable("Editorial");
 
                 entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("id");
 
                 entity.Property(e => e.Nombre)
@@ -406,11 +418,6 @@ namespace BibliotecaUDEO.Models
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("rol");
-
-                entity.Property(e => e.Image)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .HasColumnName("image");
             });
 
             OnModelCreatingPartial(modelBuilder);

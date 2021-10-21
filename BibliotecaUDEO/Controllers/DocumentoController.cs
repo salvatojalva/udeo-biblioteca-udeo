@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using BibliotecaUDEO.Requests;
+using Microsoft.AspNetCore.Http;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -15,19 +19,478 @@ namespace BibliotecaUDEO.Controllers
     public class DocumentoController : ControllerBase
     {
         private readonly BibliotecaUDEOContext _context;
+        public static IWebHostEnvironment _environment;
 
-        public DocumentoController(BibliotecaUDEOContext context)
+        public DocumentoController(BibliotecaUDEOContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
+        }
+        [HttpPost("StoreDocumento")]
+
+        /*
+        public async Task<ActionResult<Usuario>> PostDocumentormData([FromForm] DocumentoRequest documenRequest)
+        {
+            int anio_id = 0;
+            int categoria_id=0,division_id=0, tipo_id=0,carrear_id=0,sede_id=0;
+          if(documenRequest.anio_id==null)
+            {
+                Anio anio = new Anio();
+                anio.Nombre = documenRequest.nombreanio;
+                _context.Anios.Add(anio);
+                await _context.SaveChangesAsync();
+                anio_id = anio.Id;
+            }
+            else
+            {
+                anio_id = (int)documenRequest.anio_id;
+            }
+
+          if(documenRequest.categoria_id==null)
+            {
+                Categorium categoria = new Categorium();
+                categoria.Nombre = documenRequest.categorianombre;
+                _context.Categoria.Add(categoria);
+                await _context.SaveChangesAsync();
+                categoria_id = categoria.Id;
+            }
+            else
+            {
+                categoria_id = (int)documenRequest.categoria_id;
+            }
+
+
+            if (documenRequest.division_id == null)
+            {
+                Division division = new Division();
+                division.Nombre = documenRequest.divisionnombre;
+                _context.Divisions.Add(division);
+                await _context.SaveChangesAsync();
+                division_id = division.Id;
+            }
+            else
+            {
+                division_id = (int)documenRequest.division_id;
+            }
+            if (documenRequest.tipo_id == null)
+            {
+                TipoDocumento tipo = new TipoDocumento();
+                tipo.Tipo = documenRequest.tiponombre;
+                _context.TipoDocumentos.Add(tipo);
+                await _context.SaveChangesAsync();
+               tipo_id = tipo.Id;
+            }
+            else
+            {
+                tipo_id = (int)documenRequest.tipo_id;
+            }
+
+            if (documenRequest.carrera_id == null)
+            {
+                Carrera carrera= new Carrera();
+                carrera.Nombre = documenRequest.carreanombre;
+                _context.Carreras.Add(carrera);
+                await _context.SaveChangesAsync();
+                carrear_id = carrera.Id;
+            }
+            else
+            {
+                carrear_id = (int)documenRequest.carrera_id;
+            }
+           if (documenRequest.sede_id == null)
+            {
+                Sede sede = new Sede();
+                sede.Nombre = documenRequest.sedenombre;
+                _context.Sedes.Add(sede);
+                await _context.SaveChangesAsync();
+                carrear_id = sede.Id;
+            }
+            else
+            {
+                sede_id = (int)documenRequest.sede_id;
+            }
+
+
+
+           string endpointimagen;
+            endpointimagen = "";
+
+            if (documenRequest.imagen.Length > 0)
+            {
+                if (!Directory.Exists(_environment.WebRootPath + "\\Uplods\\"))
+                {
+                    Directory.CreateDirectory(_environment.WebRootPath + "\\Uplods\\");
+                }
+                DateTime foo = DateTime.Now;
+                long unixTime = ((DateTimeOffset)foo).ToUnixTimeSeconds();
+                string[] formatosadmitidos = { ".PNG", ".JPG" };
+                string FormatoImagen = Path.GetExtension(documenRequest.imagen.FileName).ToUpper();
+
+                if (formatosadmitidos.Contains(FormatoImagen))
+                {
+                    string NombreImagen = documenRequest.imagen.FileName;
+                    NombreImagen = Convert.ToString(unixTime) + FormatoImagen;
+                    var filpath = _environment.WebRootPath + "\\Uplods\\" + NombreImagen;
+
+                    using (FileStream fileStream = System.IO.File.Create(filpath))
+                    {
+                        documenRequest.imagen.CopyTo(fileStream);
+                        fileStream.Flush();
+                        endpointimagen = NombreImagen;
+                    }
+                }
+            }
+
+            Documento documento = new Documento();
+
+            documento.Codigo = documenRequest.codigo;
+            documento.Titulo = documenRequest.titulo;
+            documento.Creado = documenRequest.FechaCreado;
+            documento.Modificado = documenRequest.FechaModificado;
+            documento.Image = endpointimagen;
+            documento.AnioId = anio_id;
+            documento.CategoriaId = categoria_id;
+            documento.DivisionId = division_id;
+            documento.TipoDocumentoId = tipo_id;
+            documento.CarreraId = carrear_id;
+
+            _context.Documentos.Add(documento);
+            await _context.SaveChangesAsync();
+
+
+
+            DocumentoItem documentoitem = new DocumentoItem();
+            string endpointArchivo;
+            endpointArchivo = "";
+
+            if (documenRequest.archivo!=null)
+            {
+                if (!Directory.Exists(_environment.WebRootPath + "\\Uplods\\"))
+                {
+                    Directory.CreateDirectory(_environment.WebRootPath + "\\Uplods\\");
+                }
+                DateTime foo = DateTime.Now;
+                long unixTime = ((DateTimeOffset)foo).ToUnixTimeSeconds();
+                string[] formatosadmitidos = { ".PDF"};
+                string FormatoArchivo = Path.GetExtension(documenRequest.archivo.FileName).ToUpper();
+
+                if (formatosadmitidos.Contains(FormatoArchivo))
+                {
+                    string NombreArchivo = documenRequest.archivo.FileName;
+                    NombreArchivo = Convert.ToString(unixTime) + FormatoArchivo;
+                    var filpath = _environment.WebRootPath + "\\Uplods\\" + NombreArchivo;
+
+                    using (FileStream fileStream = System.IO.File.Create(filpath))
+                    {
+                        documenRequest.archivo.CopyTo(fileStream);
+                        fileStream.Flush();
+                        endpointArchivo = NombreArchivo;
+                    }
+                }
+
+            //    DocumentoItem documentoitem = new DocumentoItem();
+                documentoitem.EsFisico = false;
+                documentoitem.LibroUrl = endpointArchivo;
+                documentoitem.NumeroPrestamos = 0;
+                documentoitem.Activo = true;
+                documentoitem.DocumentoId = documento.Id;
+                documentoitem.SedeId = sede_id;
+              
+
+            }
+            else
+            {
+                documentoitem.EsFisico = true;
+                documentoitem.LibroUrl =endpointArchivo;
+                documentoitem.NumeroPrestamos = 0;
+                documentoitem.Activo = true;
+                documentoitem.DocumentoId = documento.Id;
+                documentoitem.SedeId = sede_id;
+            }
+
+            _context.DocumentoItems.Add(documentoitem);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetDocumento", new { id = documento.Id }, documento);
+        }
+        */
+
+        [HttpPost("UploadDocumento")]
+        public async Task<ActionResult<Documento>> UploadDocumento([FromForm] DocumentoRequest request)
+        {
+            int? carrera_id, 
+                anio_id, 
+                categoria_id, 
+                division_id,
+                sede_id,
+                documento_id,
+                editorial_id = 0,
+                tipo_documento_id;
+            string documento_nombre;
+            bool editorial_id_null = false;
+
+
+            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            {
+
+                if (request.Carrera.Id == null)
+                {
+                    Carrera carrera = new Carrera();
+                    carrera.Nombre = request.Carrera.Nombre;
+                    _context.Carreras.Add(carrera);
+                    await _context.SaveChangesAsync();
+                    carrera_id = carrera.Id;
+                }
+                else carrera_id = request.Carrera.Id;
+
+                if (request.Anio.Id == null)
+                {
+                    Anio entidad = new Anio();
+                    entidad.Nombre = request.Anio.Nombre;
+                    _context.Anios.Add(entidad);
+                    await _context.SaveChangesAsync();
+                    anio_id = entidad.Id;
+                }
+                else anio_id = request.Anio.Id;
+
+                if (request.Categoria.Id == null)
+                {
+                    Categorium entidad = new Categorium();
+                    entidad.Nombre = request.Categoria.Nombre;
+                    _context.Categoria.Add(entidad);
+                    await _context.SaveChangesAsync();
+                    categoria_id = entidad.Id;
+                }
+                else categoria_id = request.Categoria.Id;
+
+                if (request.Division.Id == null)
+                {
+                    Division entidad = new Division();
+                    entidad.Nombre = request.Division.Nombre;
+                    _context.Divisions.Add(entidad);
+                    await _context.SaveChangesAsync();
+                    division_id = entidad.Id;
+                }
+                else division_id = request.Division.Id;
+
+                if (request.TipoDocumento.Id == null)
+                {
+                    TipoDocumento entidad = new TipoDocumento();
+                    entidad.Tipo = request.TipoDocumento.Nombre;
+                    _context.TipoDocumentos.Add(entidad);
+                    await _context.SaveChangesAsync();
+                    tipo_documento_id = entidad.Id;
+                }
+                else tipo_documento_id = request.TipoDocumento.Id;
+
+                if (request.Editorial.Nombre != null)
+                {
+                    Editorial entidad = new Editorial();
+                    entidad.Nombre = request.Editorial.Nombre;
+                    _context.Editorials.Add(entidad);
+                    await _context.SaveChangesAsync();
+                    editorial_id = entidad.Id;
+                } else editorial_id_null = true;
+                
+                
+
+                Documento documento = new Documento();
+                documento.Codigo = request.Codigo;
+                documento.Titulo = request.Titulo;
+                documento.Image = getPortadaFileName(request.Portada);
+                documento.Creado = DateTime.Now;
+                documento.Modificado = DateTime.Now;
+                documento.AnioId = (int)anio_id;
+                documento.CarreraId = (int)carrera_id;
+                documento.CategoriaId = (int)categoria_id;
+                documento.TipoDocumentoId = (int)tipo_documento_id;
+                documento.DivisionId = (int)division_id;
+                documento.EditorialId = editorial_id_null ? null : (int)editorial_id;
+
+                _context.Documentos.Add(documento);
+                await _context.SaveChangesAsync();
+                documento_id = documento.Id;
+
+                if (request.Sede.Id == null)
+                {
+                    Sede entidad = new Sede();
+                    entidad.Nombre = request.Sede.Nombre;
+                    entidad.Direccion = request.Sede.Direccion;
+                    _context.Sedes.Add(entidad);
+                    await _context.SaveChangesAsync();
+                    sede_id = entidad.Id;
+                }
+                else sede_id = request.Sede.Id;
+
+                documento_nombre = getDocumentoFileName(request.Documento);
+
+
+                if(documento_nombre != null)
+                {
+                    await createEjemplar(false,documento_nombre, documento_id, sede_id);
+                }
+
+                for (int iteracion = 0; iteracion < request.CantidadEjemplares; iteracion++)
+                {
+                    await createEjemplar(true, "", documento_id, sede_id);
+                }
+
+                foreach (var autor in request.Autores)
+                {
+                    int? autor_id;
+
+                    if (autor.Id == null)
+                    {
+                        Autor entidad = new Autor();
+                        entidad.Nombre = autor.Nombre;
+                        _context.Autors.Add(entidad);
+                        await _context.SaveChangesAsync();
+                        autor_id = entidad.Id;
+                    }
+                    else autor_id = autor.Id;
+
+                    await asignarCrearAutores((int)autor_id, (int)documento_id);
+                }
+
+                foreach (var tag in request.Tags)
+                {
+                    int? tag_id;
+
+                    if (tag.Id == null)
+                    {
+                        Tag entidad = new Tag();
+                        entidad.Nombre = tag.Nombre;
+                        _context.Tags.Add(entidad);
+                        await _context.SaveChangesAsync();
+                        tag_id = entidad.Id;
+                    }
+                    else tag_id = tag.Id;
+
+                    await asignarCrearTags((int)tag_id, (int)documento_id);
+                }
+
+
+                dbContextTransaction.Commit();
+                return documento;
+            }
+
+            
         }
 
+
+        private async Task<ActionResult<AutorDocumento>> asignarCrearAutores(int autor_id, int documento_id)
+        {
+            AutorDocumento autor = new AutorDocumento();
+
+            autor.AutorId = autor_id;
+            autor.DocumentoId = documento_id;
+
+            _context.AutorDocumentos.Add(autor);
+            await _context.SaveChangesAsync();
+
+            return autor;
+
+        }
+
+        private async Task<ActionResult<TagDocumento>> asignarCrearTags(int tag_id, int documento_id)
+        {
+            TagDocumento tag = new TagDocumento();
+
+            tag.TagId = tag_id;
+            tag.DocumentoId = documento_id;
+
+            _context.TagDocumentos.Add(tag);
+            await _context.SaveChangesAsync();
+
+            return tag;
+
+        }
+
+
+        private async Task<ActionResult<DocumentoItem>> createEjemplar(bool fisico, string nombre, int? documento_id, int? sede_id)
+        {
+            DocumentoItem ejemplar = new DocumentoItem();
+
+            ejemplar.EsFisico = fisico;
+            ejemplar.LibroUrl = nombre;
+            ejemplar.NumeroPrestamos = 0;
+            ejemplar.Activo = true;
+            ejemplar.DocumentoId = (int)documento_id;
+            ejemplar.SedeId = (int)sede_id;
+
+            _context.DocumentoItems.Add(ejemplar);
+            await _context.SaveChangesAsync();
+
+            return ejemplar;
+
+        }
+
+        private string getDocumentoFileName(IFormFile documento)
+        {
+            string documento_nombre = "";
+
+            if (!Directory.Exists(_environment.WebRootPath + "\\Files\\"))
+            {
+                Directory.CreateDirectory(_environment.WebRootPath + "\\Files\\");
+            }
+            DateTime foo = DateTime.Now;
+            long unixTime = ((DateTimeOffset)foo).ToUnixTimeSeconds();
+            string[] formatosadmitidos = { ".PDF" };
+            string FormatoArchivo = Path.GetExtension(documento.FileName).ToUpper();
+
+            if (formatosadmitidos.Contains(FormatoArchivo))
+            {
+                string NombreArchivo = documento.FileName;
+                NombreArchivo = Convert.ToString(unixTime) + FormatoArchivo;
+                var filpath = _environment.WebRootPath + "\\Files\\" + NombreArchivo;
+
+                using (FileStream fileStream = System.IO.File.Create(filpath))
+                {
+                    documento.CopyTo(fileStream);
+                    fileStream.Flush();
+                    documento_nombre = NombreArchivo;
+                }
+            }
+
+            return documento_nombre;
+        }
+
+        private string getPortadaFileName(IFormFile documento)
+        {
+            string documento_nombre = "";
+
+            if (!Directory.Exists(_environment.WebRootPath + "\\Images\\"))
+            {
+                Directory.CreateDirectory(_environment.WebRootPath + "\\Images\\");
+            }
+            DateTime foo = DateTime.Now;
+            long unixTime = ((DateTimeOffset)foo).ToUnixTimeSeconds();
+            string[] formatosadmitidos = { ".PNG", ".JPG" };
+            string FormatoImagen = Path.GetExtension(documento.FileName).ToUpper();
+
+            if (formatosadmitidos.Contains(FormatoImagen))
+            {
+                string NombreImagen = documento.FileName;
+                NombreImagen = Convert.ToString(unixTime) + FormatoImagen;
+                var filpath = _environment.WebRootPath + "\\Images\\" + NombreImagen;
+
+                using (FileStream fileStream = System.IO.File.Create(filpath))
+                {
+                    documento.CopyTo(fileStream);
+                    fileStream.Flush();
+                    documento_nombre = NombreImagen;
+                }
+            }
+
+            return documento_nombre;
+        }
         // GET: api/Documento
         [Authorize]
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] string filterByTitle, int? page, int? records)
         {
             int _page = page ?? 1;
-            int _records = records ?? 10;
+            int _records = records ?? 7;
             int total_page;
             int totalCount;
             List<Documento> documento = new List<Documento>();
