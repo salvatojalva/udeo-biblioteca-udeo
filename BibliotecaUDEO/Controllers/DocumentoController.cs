@@ -26,194 +26,6 @@ namespace BibliotecaUDEO.Controllers
             _context = context;
             _environment = environment;
         }
-        [HttpPost("StoreDocumento")]
-
-        /*
-        public async Task<ActionResult<Usuario>> PostDocumentormData([FromForm] DocumentoRequest documenRequest)
-        {
-            int anio_id = 0;
-            int categoria_id=0,division_id=0, tipo_id=0,carrear_id=0,sede_id=0;
-          if(documenRequest.anio_id==null)
-            {
-                Anio anio = new Anio();
-                anio.Nombre = documenRequest.nombreanio;
-                _context.Anios.Add(anio);
-                await _context.SaveChangesAsync();
-                anio_id = anio.Id;
-            }
-            else
-            {
-                anio_id = (int)documenRequest.anio_id;
-            }
-
-          if(documenRequest.categoria_id==null)
-            {
-                Categorium categoria = new Categorium();
-                categoria.Nombre = documenRequest.categorianombre;
-                _context.Categoria.Add(categoria);
-                await _context.SaveChangesAsync();
-                categoria_id = categoria.Id;
-            }
-            else
-            {
-                categoria_id = (int)documenRequest.categoria_id;
-            }
-
-
-            if (documenRequest.division_id == null)
-            {
-                Division division = new Division();
-                division.Nombre = documenRequest.divisionnombre;
-                _context.Divisions.Add(division);
-                await _context.SaveChangesAsync();
-                division_id = division.Id;
-            }
-            else
-            {
-                division_id = (int)documenRequest.division_id;
-            }
-            if (documenRequest.tipo_id == null)
-            {
-                TipoDocumento tipo = new TipoDocumento();
-                tipo.Tipo = documenRequest.tiponombre;
-                _context.TipoDocumentos.Add(tipo);
-                await _context.SaveChangesAsync();
-               tipo_id = tipo.Id;
-            }
-            else
-            {
-                tipo_id = (int)documenRequest.tipo_id;
-            }
-
-            if (documenRequest.carrera_id == null)
-            {
-                Carrera carrera= new Carrera();
-                carrera.Nombre = documenRequest.carreanombre;
-                _context.Carreras.Add(carrera);
-                await _context.SaveChangesAsync();
-                carrear_id = carrera.Id;
-            }
-            else
-            {
-                carrear_id = (int)documenRequest.carrera_id;
-            }
-           if (documenRequest.sede_id == null)
-            {
-                Sede sede = new Sede();
-                sede.Nombre = documenRequest.sedenombre;
-                _context.Sedes.Add(sede);
-                await _context.SaveChangesAsync();
-                carrear_id = sede.Id;
-            }
-            else
-            {
-                sede_id = (int)documenRequest.sede_id;
-            }
-
-
-
-           string endpointimagen;
-            endpointimagen = "";
-
-            if (documenRequest.imagen.Length > 0)
-            {
-                if (!Directory.Exists(_environment.WebRootPath + "\\Uplods\\"))
-                {
-                    Directory.CreateDirectory(_environment.WebRootPath + "\\Uplods\\");
-                }
-                DateTime foo = DateTime.Now;
-                long unixTime = ((DateTimeOffset)foo).ToUnixTimeSeconds();
-                string[] formatosadmitidos = { ".PNG", ".JPG" };
-                string FormatoImagen = Path.GetExtension(documenRequest.imagen.FileName).ToUpper();
-
-                if (formatosadmitidos.Contains(FormatoImagen))
-                {
-                    string NombreImagen = documenRequest.imagen.FileName;
-                    NombreImagen = Convert.ToString(unixTime) + FormatoImagen;
-                    var filpath = _environment.WebRootPath + "\\Uplods\\" + NombreImagen;
-
-                    using (FileStream fileStream = System.IO.File.Create(filpath))
-                    {
-                        documenRequest.imagen.CopyTo(fileStream);
-                        fileStream.Flush();
-                        endpointimagen = NombreImagen;
-                    }
-                }
-            }
-
-            Documento documento = new Documento();
-
-            documento.Codigo = documenRequest.codigo;
-            documento.Titulo = documenRequest.titulo;
-            documento.Creado = documenRequest.FechaCreado;
-            documento.Modificado = documenRequest.FechaModificado;
-            documento.Image = endpointimagen;
-            documento.AnioId = anio_id;
-            documento.CategoriaId = categoria_id;
-            documento.DivisionId = division_id;
-            documento.TipoDocumentoId = tipo_id;
-            documento.CarreraId = carrear_id;
-
-            _context.Documentos.Add(documento);
-            await _context.SaveChangesAsync();
-
-
-
-            DocumentoItem documentoitem = new DocumentoItem();
-            string endpointArchivo;
-            endpointArchivo = "";
-
-            if (documenRequest.archivo!=null)
-            {
-                if (!Directory.Exists(_environment.WebRootPath + "\\Uplods\\"))
-                {
-                    Directory.CreateDirectory(_environment.WebRootPath + "\\Uplods\\");
-                }
-                DateTime foo = DateTime.Now;
-                long unixTime = ((DateTimeOffset)foo).ToUnixTimeSeconds();
-                string[] formatosadmitidos = { ".PDF"};
-                string FormatoArchivo = Path.GetExtension(documenRequest.archivo.FileName).ToUpper();
-
-                if (formatosadmitidos.Contains(FormatoArchivo))
-                {
-                    string NombreArchivo = documenRequest.archivo.FileName;
-                    NombreArchivo = Convert.ToString(unixTime) + FormatoArchivo;
-                    var filpath = _environment.WebRootPath + "\\Uplods\\" + NombreArchivo;
-
-                    using (FileStream fileStream = System.IO.File.Create(filpath))
-                    {
-                        documenRequest.archivo.CopyTo(fileStream);
-                        fileStream.Flush();
-                        endpointArchivo = NombreArchivo;
-                    }
-                }
-
-            //    DocumentoItem documentoitem = new DocumentoItem();
-                documentoitem.EsFisico = false;
-                documentoitem.LibroUrl = endpointArchivo;
-                documentoitem.NumeroPrestamos = 0;
-                documentoitem.Activo = true;
-                documentoitem.DocumentoId = documento.Id;
-                documentoitem.SedeId = sede_id;
-              
-
-            }
-            else
-            {
-                documentoitem.EsFisico = true;
-                documentoitem.LibroUrl =endpointArchivo;
-                documentoitem.NumeroPrestamos = 0;
-                documentoitem.Activo = true;
-                documentoitem.DocumentoId = documento.Id;
-                documentoitem.SedeId = sede_id;
-            }
-
-            _context.DocumentoItems.Add(documentoitem);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDocumento", new { id = documento.Id }, documento);
-        }
-        */
 
         [HttpPost("UploadDocumento")]
         public async Task<ActionResult<Documento>> UploadDocumento([FromForm] DocumentoRequest request)
@@ -499,15 +311,22 @@ namespace BibliotecaUDEO.Controllers
                 decimal total_records = await _context.Documentos.Where(x => x.Titulo.Contains(filterByTitle)).CountAsync();
                 totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
-                documento = await _context.Documentos.Where(x => x.Titulo.Contains(filterByTitle)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+                documento = await _context
+                    .Documentos
+                    .Where(x => x.Titulo.Contains(filterByTitle))
+                    .OrderBy(x =>x.Titulo)
+                    .Skip((_page - 1) * _records).Take(_records)
+                    .ToListAsync();
             }
             else
             {
                 decimal total_records = await _context.Documentos.CountAsync();
                 totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
-                documento = await _context.Documentos.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+                documento = await _context.Documentos.Skip((_page - 1) * _records).Take(_records).OrderBy(x => x.Titulo).ToListAsync();
             }
+
+
             return Ok(new
             {
                 totalCount = totalCount,

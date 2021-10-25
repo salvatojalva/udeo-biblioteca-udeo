@@ -24,9 +24,35 @@ namespace BibliotecaUDEO.Controllers
         // GET: api/TipoDocumento
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TipoDocumento>>> GetTipoDocumentos()
+        public async Task<ActionResult> Get([FromQuery] string filterByTitle, int? page, int? records)
         {
-            return await _context.TipoDocumentos.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 7;
+            int total_page;
+            int totalCount;
+            List<TipoDocumento> documento = new List<TipoDocumento>();
+            if (filterByTitle != null)
+            {
+                decimal total_records = await _context.TipoDocumentos.Where(x => x.Tipo.Contains(filterByTitle)).CountAsync();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                documento = await _context.TipoDocumentos.Where(x => x.Tipo.Contains(filterByTitle)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.TipoDocumentos.CountAsync();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                documento = await _context.TipoDocumentos.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+
+            return Ok(new
+            {
+                totalCount = totalCount,
+                records = documento,
+                current_page = _page
+            });
+
         }
 
         // GET: api/TipoDocumento/5
