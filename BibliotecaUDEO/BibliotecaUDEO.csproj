@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <UserSecretsId>de6e6513-d657-4109-b63c-cf3cb97c0b37</UserSecretsId>
+    <UserSecretsId>b3c42ddc-a038-4b89-94d8-12562aa765f0</UserSecretsId>
   </PropertyGroup>
 
 
@@ -30,8 +30,18 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="wwwroot\" />
-    <Folder Include="wwwroot\Uplods\" />
+    <Content Update="Properties\serviceDependencies.BibliotecaUDEO.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Properties\serviceDependencies.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Properties\serviceDependencies.local.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" properties_4launchsettings_1json__JsonSchema="https://docs.gradle.com/enterprise/admin/schema/gradle-enterprise-config-schema-3.json" /></VisualStudio></ProjectExtensions>
 </Project>

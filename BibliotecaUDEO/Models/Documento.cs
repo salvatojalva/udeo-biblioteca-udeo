@@ -12,9 +12,11 @@ namespace BibliotecaUDEO.Models
             AutorDocumentos = new HashSet<AutorDocumento>();
             DocumentoItems = new HashSet<DocumentoItem>();
             TagDocumentos = new HashSet<TagDocumento>();
+       
         }
 
         public int Id { get; set; }
+        public int? EditorialId { get; set; }
         public string Codigo { get; set; }
         public string Titulo { get; set; }
         public DateTime Creado { get; set; }
@@ -30,6 +32,7 @@ namespace BibliotecaUDEO.Models
         public virtual Carrera Carrera { get; set; }
         public virtual Categorium Categoria { get; set; }
         public virtual Division Division { get; set; }
+        public virtual Editorial Editorial { get; set; }
         public virtual TipoDocumento TipoDocumento { get; set; }
         public virtual ICollection<AutorDocumento> AutorDocumentos { get; set; }
         public virtual ICollection<DocumentoItem> DocumentoItems { get; set; }

@@ -75,7 +75,6 @@ namespace BibliotecaUDEO.Controllers
             user.GoogleId = userFormData.googleId;
             user.Activo = true;
             user.Rol = userFormData.rol;
-            user.Image = endpointimagen;
 
             _context.Usuarios.Add(user);
             await _context.SaveChangesAsync();

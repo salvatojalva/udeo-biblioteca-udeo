@@ -18,7 +18,6 @@ namespace BibliotecaUDEO.Models
         public string GoogleId { get; set; }
         public bool Activo { get; set; }
         public string Rol { get; set; }
-        public string Image { get; set; }
 
         public virtual ICollection<Prestamo> Prestamos { get; set; }
     }
