@@ -337,6 +337,90 @@ namespace BibliotecaUDEO.Controllers
 
         }
 
+        // GET: api/Documento
+        [HttpGet("Busqueda")]
+        public async Task<ActionResult<Documento>> Get([FromQuery] string filtro1, string FilterByAutor, string FilterByTag, int? page, int? records)
+        {
+            int _page = page ?? 1;
+            int _records = records ?? 7;
+            int total_page;
+            int totalCount;
+            List<Documento> documento = new List<Documento>();
+            List<Documento> docu = new List<Documento>();
+            if (filtro1 != null)
+            {
+                docu = (from doc in _context.Documentos
+                            .Include(anio => anio.Anio)
+                            .Include(division => division.Division)
+                            .Include(categoria => categoria.Categoria)
+                            .Include(tipoDocumento => tipoDocumento.TipoDocumento)
+                            .Include(carrera => carrera.Carrera)
+                            .Include(editorial => editorial.Editorial)
+                        where doc.Anio.Nombre.Contains(filtro1)
+                             || doc.Categoria.Nombre.Contains(filtro1)
+                             || doc.Division.Nombre.Contains(filtro1)
+                             || doc.TipoDocumento.Tipo.Contains(filtro1)
+                             || doc.Carrera.Nombre.Contains(filtro1)
+                             || doc.Editorial.Nombre.Contains(filtro1)
+                        select doc).ToList();
+            }
+            else if (FilterByAutor != null)
+            {
+                docu = (from doc in _context.Documentos
+                            .Include(anio => anio.Anio)
+                            .Include(division => division.Division)
+                            .Include(categoria => categoria.Categoria)
+                            .Include(tipoDocumento => tipoDocumento.TipoDocumento)
+                            .Include(carrera => carrera.Carrera)
+                            .Include(editorial => editorial.Editorial)
+                        join autdoc in _context.AutorDocumentos on doc.Id equals autdoc.DocumentoId
+                        where autdoc.Autor.Nombre.Contains(FilterByAutor)
+                        select   doc
+                        
+                        ).ToList();
+            }
+            else if (FilterByTag != null)
+            {
+                docu = (from doc in _context.Documentos
+                            .Include(anio => anio.Anio)
+                            .Include(division => division.Division)
+                            .Include(categoria => categoria.Categoria)
+                            .Include(tipoDocumento => tipoDocumento.TipoDocumento)
+                            .Include(carrera => carrera.Carrera)
+                            .Include(editorial => editorial.Editorial)
+                        join tagdoc in _context.TagDocumentos on doc.Id equals tagdoc.DocumentoId
+                        where tagdoc.Tag.Nombre.Contains(FilterByTag)
+                        select doc).ToList();
+            }
+            if (docu.Count() != 0)
+            {
+                decimal total_records = docu.Count();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                documento = docu.Skip((_page - 1) * _records).Take(_records).ToList();
+            }
+            else
+            {
+                decimal total_records = await _context.Documentos.CountAsync();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                documento = await _context.Documentos
+                    .Include(anio => anio.Anio)
+                    .Include(division => division.Division)
+                    .Include(categoria => categoria.Categoria)
+                    .Include(tipoDocumento => tipoDocumento.TipoDocumento)
+                    .Include(carrera => carrera.Carrera)
+                    .Include(editorial => editorial.Editorial)
+                    .Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            return Ok(new
+            {
+                current_page = _page,
+                totalCount = totalCount,
+                result = documento
+            });
+        }
+
         // GET: api/Documento/5
         [Authorize]
         [HttpGet("{id}")]
