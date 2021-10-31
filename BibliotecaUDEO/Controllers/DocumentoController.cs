@@ -325,6 +325,8 @@ namespace BibliotecaUDEO.Controllers
                                   .Include(tipoDocumento => tipoDocumento.TipoDocumento)
                                   .Include(carrera => carrera.Carrera)
                                   .Include(editorial => editorial.Editorial)
+                                   .Include(autordocumento=>autordocumento.AutorDocumentos)
+                                   .ThenInclude(autor=>autor.Autor)
                         where doc.Anio.Nombre.Contains(filtro1)
                              || doc.Categoria.Nombre.Contains(filtro1)
                              || doc.Division.Nombre.Contains(filtro1)
@@ -336,6 +338,14 @@ namespace BibliotecaUDEO.Controllers
             else if (FilterByAutor != null)
             {
                 docu = (from doc in _context.Documentos
+                         .Include(anio => anio.Anio)
+                                  .Include(division => division.Division)
+                                  .Include(categoria => categoria.Categoria)
+                                  .Include(tipoDocumento => tipoDocumento.TipoDocumento)
+                                  .Include(carrera => carrera.Carrera)
+                                  .Include(editorial => editorial.Editorial)
+                                   .Include(autordocumento => autordocumento.AutorDocumentos)
+                                   .ThenInclude(autor => autor.Autor)
                         join autdoc in _context.AutorDocumentos on doc.Id equals autdoc.DocumentoId
                         where autdoc.Autor.Nombre.Contains(FilterByAutor)
                         select doc).ToList();
@@ -343,6 +353,14 @@ namespace BibliotecaUDEO.Controllers
             else if(FilterByTag!=null)
             {
                 docu = (from doc in _context.Documentos
+                         .Include(anio => anio.Anio)
+                                  .Include(division => division.Division)
+                                  .Include(categoria => categoria.Categoria)
+                                  .Include(tipoDocumento => tipoDocumento.TipoDocumento)
+                                  .Include(carrera => carrera.Carrera)
+                                  .Include(editorial => editorial.Editorial)
+                                   .Include(autordocumento => autordocumento.AutorDocumentos)
+                                   .ThenInclude(autor => autor.Autor)
                         join tagdoc in _context.TagDocumentos on doc.Id equals tagdoc.DocumentoId
                         where tagdoc.Tag.Nombre.Contains(FilterByTag)
                         select doc).ToList();
@@ -359,7 +377,16 @@ namespace BibliotecaUDEO.Controllers
                 decimal total_records = await _context.Documentos.CountAsync();
                 totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
-                documento = await _context.Documentos.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+                documento = await _context.Documentos
+                                    .Include(anio => anio.Anio)
+                                  .Include(division => division.Division)
+                                  .Include(categoria => categoria.Categoria)
+                                  .Include(tipoDocumento => tipoDocumento.TipoDocumento)
+                                  .Include(carrera => carrera.Carrera)
+                                  .Include(editorial => editorial.Editorial)
+                                   .Include(autordocumento => autordocumento.AutorDocumentos)
+                                   .ThenInclude(autor => autor.Autor)
+                    .Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             return Ok(new
             {
