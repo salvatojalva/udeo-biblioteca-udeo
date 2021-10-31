@@ -22,11 +22,107 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Prestamo
-        [Authorize]
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Prestamo>>> GetPrestamos()
+        //[Authorize]
+        [HttpGet("Devuelto")]
+        public async Task<ActionResult<Prestamo>> GetPrestamos([FromQuery]int UsuarioID, int filterbydevuelto, int? page, int? records)
         {
-            return await _context.Prestamos.ToListAsync();
+            int _page = page ?? 1;
+            int _records = records ?? 1;
+            int total_page;
+            int totalCount;
+            List<Prestamo> prestamo = new List<Prestamo>();
+
+            if (filterbydevuelto==0||filterbydevuelto==1)
+            {
+                decimal total_records = await _context.Prestamos
+                    .Where(x => x.UsuarioId == UsuarioID&&x.Devuelto==Convert.ToBoolean(filterbydevuelto))
+                    .CountAsync();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                prestamo = await _context.Prestamos
+                    .Include(documentoitem => documentoitem.DocumentoItem)
+                             .ThenInclude(documento => documento.Documento)
+                    .Where(x => x.UsuarioId == UsuarioID && x.Devuelto == Convert.ToBoolean(filterbydevuelto))
+                    .Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+            else
+            {
+                decimal total_records = await _context.Prestamos
+                    .Where(usuario=>usuario.UsuarioId==UsuarioID)
+                    .CountAsync();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                prestamo = await _context.Prestamos
+                     .Include(documentoitem => documentoitem.DocumentoItem)
+                             .ThenInclude(documento => documento.Documento)
+                             .Where(usuario => usuario.UsuarioId == UsuarioID)
+                    .Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            }
+
+            return Ok(new
+            {
+                current_page = _page,
+                totalCount = totalCount,
+                resul = prestamo
+            });
+        }
+
+        [HttpGet("FechaFin")]
+        public async Task<ActionResult<Prestamo>> Get([FromQuery] int UsuarioID, bool filterbydevuelto, int? page, int? records)
+        {
+            int _page = page ?? 1;
+            int _records = records ?? 1;
+            int total_page;
+            int totalCount;
+            List<Prestamo> prestamo = new List<Prestamo>();
+
+                decimal total_records = await _context.Prestamos
+                    .Where(usuario => usuario.UsuarioId == UsuarioID && usuario.FechaFin <= DateTime.Now)
+                    .CountAsync();
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+            prestamo = await _context.Prestamos
+                 .Include(documentoitem => documentoitem.DocumentoItem)
+                         .ThenInclude(documento => documento.Documento)
+                         .Where(usuario => usuario.UsuarioId == UsuarioID&&usuario.FechaFin<=DateTime.Now)
+                    .Skip((_page - 1) * _records).Take(_records).ToListAsync();
+
+
+            return Ok(new
+            {
+                current_page = _page,
+                totalCount = totalCount,
+                resul = prestamo
+            });
+        }
+
+        [HttpGet("Todo")]
+        public async Task<ActionResult<Prestamo>> Get([FromQuery] int? page, int? records)
+        {
+            int _page = page ?? 1;
+            int _records = records ?? 1;
+            int total_page;
+            int totalCount;
+            List<Prestamo> prestamo = new List<Prestamo>();
+
+            decimal total_records = await _context.Prestamos
+                .Include(documentoitem => documentoitem.DocumentoItem)
+                .Include(usuario=>usuario.Usuario)
+                .CountAsync();              
+            totalCount = Convert.ToInt32(total_records);
+            total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+            prestamo = await _context.Prestamos
+                 .Include(documentoitem => documentoitem.DocumentoItem)
+                .Include(usuario => usuario.Usuario)
+                .Where(x => x.UsuarioId == 1).Skip((_page - 1) * _records)
+                .Take(_records).ToListAsync();
+
+            return Ok(new
+            {
+                current_page = _page,
+                totalCount = totalCount,
+                resul = prestamo
+            });
         }
 
         // GET: api/Prestamo/5
@@ -80,7 +176,7 @@ namespace BibliotecaUDEO.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Prestamo>> PostPrestamo(Prestamo prestamo)
+        public async Task<ActionResult<Prestamo>> PostPrestamo([FromForm]Prestamo prestamo)
         {
             _context.Prestamos.Add(prestamo);
             await _context.SaveChangesAsync();
