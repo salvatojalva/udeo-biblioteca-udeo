@@ -275,20 +275,21 @@ namespace BibliotecaUDEO.Controllers
             return documento_nombre;
         }
         // GET: api/Documento
-        /*[HttpGet]
-        public async Task<ActionResult> Get([FromQuery] string filterByTitle, int? page, int? records)
+        [HttpGet("NombreTitulo")]
+        public async Task<ActionResult> Get([FromQuery] string filtro, int? page, int? records)
         {
             int _page = page ?? 1;
             int _records = records ?? 7;
             int total_page;
             int totalCount;
             List<Documento> documento = new List<Documento>();
-            if (filterByTitle != null)
+            if (filtro != null)
             {
-                decimal total_records = await _context.Documentos.Where(x => x.Titulo.Contains(filterByTitle)).CountAsync();
+                decimal total_records = await _context.Documentos.Where(x => x.Titulo.Contains(filtro)||x.Codigo.Contains(filtro)).CountAsync();
                 totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
-                documento = await _context.Documentos.Where(x => x.Titulo.Contains(filterByTitle)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+                documento = await _context.Documentos.Where(x => x.Titulo.Contains(filtro)||x.Codigo.Contains(filtro))
+                                                     .Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             else
             {
@@ -303,7 +304,7 @@ namespace BibliotecaUDEO.Controllers
                 records = documento,
                 current_page = _page
             });
-        }*/
+        }
 
 
         // GET: api/Documento
