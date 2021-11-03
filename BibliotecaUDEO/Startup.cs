@@ -21,7 +21,7 @@ namespace BibliotecaUDEO
 {
     public class Startup
     {
-
+        readonly string MyAllowSpecificOrigins = "_CorsPlx";
         public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions>
         {
             public void Configure(string name, JwtBearerOptions options)
@@ -63,9 +63,8 @@ namespace BibliotecaUDEO
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddCors(c => {
-                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-            });
+
+            services.AddCors();
 
             services.AddControllersWithViews()
                 .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
@@ -91,24 +90,38 @@ namespace BibliotecaUDEO
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            app.UseCors(opt =>
+            {
+                opt.WithOrigins("*");
+                opt.AllowAnyHeader();
+                opt.AllowAnyMethod();
+            });
+
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers()
+                    .RequireCors(MyAllowSpecificOrigins); ;
             });
 
-            app.UseStaticFiles();
+            
+            
+            
+
 
         }
 

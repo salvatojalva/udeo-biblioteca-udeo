@@ -27,6 +27,7 @@ namespace BibliotecaUDEO.Controllers
             _environment = environment;
         }
 
+        [Authorize]
         [HttpPost("UploadDocumento")]
         public async Task<ActionResult<Documento>> UploadDocumento([FromForm] DocumentoRequest request)
         {
@@ -297,6 +298,7 @@ namespace BibliotecaUDEO.Controllers
             return documento_nombre;
         }
         // GET: api/Documento
+        [Authorize]
         [HttpGet("NombreTitulo")]
         public async Task<ActionResult> Get([FromQuery] string filtro, int? page, int? records)
         {
@@ -331,6 +333,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Documento
+        [Authorize]
         [HttpGet("Busqueda")]
         public async Task<ActionResult<Documento>> Get([FromQuery] string filtro1, string FilterByAutor, string FilterByTag, int? page, int? records)
         {
@@ -387,7 +390,15 @@ namespace BibliotecaUDEO.Controllers
                 decimal total_records = await _context.Documentos.CountAsync();
                 totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
-                documento = await _context.Documentos.Skip((_page - 1) * _records).Take(_records).ToListAsync();
+                documento = await _context.Documentos
+                        .Include(anio => anio.Anio)
+                        .Include(division => division.Division)
+                        .Include(categoria => categoria.Categoria)
+                        .Include(tipoDocumento => tipoDocumento.TipoDocumento)
+                        .Include(carrera => carrera.Carrera)
+                        .Include(editorial => editorial.Editorial)
+
+                    .Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             return Ok(new
             {

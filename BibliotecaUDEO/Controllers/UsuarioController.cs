@@ -24,6 +24,8 @@ namespace BibliotecaUDEO.Controllers
             _context = context;
             _environment = environment;
         }
+
+        [Authorize]
         [HttpPost("StoreUsuario")]
         public async Task<ActionResult<Usuario>> PostUserFormData([FromForm] UsuarioFormData userFormData)
         {
@@ -83,7 +85,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Usuario
-
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery]  string filterByName, int? page, int? records)
         {
@@ -94,20 +96,20 @@ namespace BibliotecaUDEO.Controllers
 
             if (filterByName != null)
             {
-                decimal total_records = await _context.Usuarios.Where(x => x.Nombre.Contains(filterByName)).CountAsync();
-                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
-                usuarios = await _context.Usuarios.Where(x => x.Nombre.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
+                decimal total_records = await _context.Usuarios.Where(x => x.GoogleId.Contains(filterByName)).CountAsync();
+                total_page = Convert.ToInt32(Math.Ceiling(total_records ));
+                usuarios = await _context.Usuarios.Where(x => x.GoogleId.Contains(filterByName)).Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
             else
             {
                 decimal total_records = await _context.Usuarios.CountAsync();
-                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                total_page = Convert.ToInt32(Math.Ceiling(total_records ));
                 usuarios = await _context.Usuarios.Skip((_page - 1) * _records).Take(_records).ToListAsync();
             }
 
             return Ok(new
             {
-                pages = total_page,
+                totalCount = total_page,
                 records = usuarios,
                 current_page = _page
             });

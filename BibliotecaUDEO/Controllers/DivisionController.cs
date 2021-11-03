@@ -22,6 +22,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Division
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records) 
         {

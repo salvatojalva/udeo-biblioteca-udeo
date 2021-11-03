@@ -22,7 +22,7 @@ namespace BibliotecaUDEO.Controllers
         }
 
         // GET: api/Prestamo
-        //[Authorize]
+        [Authorize]
         [HttpGet("Devuelto")]
         public async Task<ActionResult<Prestamo>> GetPrestamos([FromQuery]int UsuarioID, int filterbydevuelto, int? page, int? records)
         {
@@ -67,6 +67,7 @@ namespace BibliotecaUDEO.Controllers
             });
         }
 
+        [Authorize]
         [HttpGet("FechaFin")]
         public async Task<ActionResult<Prestamo>> Get([FromQuery] int UsuarioID, bool filterbydevuelto, int? page, int? records)
         {
@@ -96,6 +97,7 @@ namespace BibliotecaUDEO.Controllers
             });
         }
 
+        [Authorize]
         [HttpGet("Todo")]
         public async Task<ActionResult<Prestamo>> Get([FromQuery] int? page, int? records)
         {

@@ -9,6 +9,7 @@ using BibliotecaUDEO.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Cors;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -26,6 +27,7 @@ namespace BibliotecaUDEO.Controllers
             _environment = environment;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records)
         {

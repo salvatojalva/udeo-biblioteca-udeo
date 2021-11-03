@@ -27,6 +27,7 @@ namespace BibliotecaUDEO.Controllers
             _environment = environment;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] string filterByName, int? page, int? records)
         {
