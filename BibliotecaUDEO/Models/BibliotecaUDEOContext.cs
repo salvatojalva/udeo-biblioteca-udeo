@@ -294,6 +294,10 @@ namespace BibliotecaUDEO.Models
 
                 entity.Property(e => e.Devuelto).HasColumnName("devuelto");
 
+                entity.Property(e => e.Devuelto).HasColumnName("aprobado");
+
+                entity.Property(e => e.Devuelto).HasColumnName("denegado");
+
                 entity.Property(e => e.DiasAtraso).HasColumnName("dias_atraso");
 
                 entity.Property(e => e.DocumentoItemId).HasColumnName("documento_item_id");
@@ -305,6 +309,10 @@ namespace BibliotecaUDEO.Models
                 entity.Property(e => e.FechaInicio)
                     .HasColumnType("date")
                     .HasColumnName("fecha_inicio");
+
+                entity.Property(e => e.FechaInicio)
+                    .HasColumnType("date")
+                    .HasColumnName("fecha_devolucion");
 
                 entity.Property(e => e.Perdida).HasColumnName("perdida");
 

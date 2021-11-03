@@ -118,10 +118,6 @@ namespace BibliotecaUDEO
                     .RequireCors(MyAllowSpecificOrigins); ;
             });
 
-            
-            
-            
-
 
         }
 

@@ -180,6 +180,115 @@ namespace BibliotecaUDEO.Controllers
         [HttpPost]
         public async Task<ActionResult<Prestamo>> PostPrestamo([FromForm]Prestamo prestamo)
         {
+            prestamo.Aprobado = true;
+            prestamo.Denegado = false;
+
+            prestamo.FechaFin = new DateTime().AddDays(7);
+            prestamo.FechaInicio = new DateTime();
+
+            var documentoItem = await _context.DocumentoItems.FindAsync(prestamo.DocumentoItemId);
+
+            if (documentoItem.EsFisico == true)
+            {
+                documentoItem.Activo = false;
+            }
+            documentoItem.NumeroPrestamos++;
+
+
+
+            _context.Prestamos.Add(prestamo);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetPrestamo", new { id = prestamo.Id }, prestamo);
+        }
+
+        // POST: api/Prestamo
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
+        [HttpPost("Solicitar")]
+        public async Task<ActionResult<Prestamo>> SolicitarPrestamo([FromForm] Prestamo prestamo)
+        {
+            prestamo.Aprobado = false;
+            prestamo.Denegado = false;
+
+            _context.Prestamos.Add(prestamo);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetPrestamo", new { id = prestamo.Id }, prestamo);
+        }
+
+
+
+        [Authorize]
+        [HttpPost("Aprobar")]
+
+        public async Task<IActionResult> AprobarPrestamo(int id, Prestamo prestamo)
+        {
+            if (id != prestamo.Id)
+            {
+                return BadRequest();
+            }
+
+            prestamo.Aprobado = true;
+            prestamo.Denegado = false;
+
+            
+
+            var documentoItem = await _context.DocumentoItems.FindAsync(prestamo.DocumentoItemId);
+
+            if (documentoItem.EsFisico == true)
+            {
+                documentoItem.Activo = false;
+            }
+
+            documentoItem.NumeroPrestamos++;
+
+            _context.Entry(documentoItem).State = EntityState.Modified;
+
+            _context.Entry(prestamo).State = EntityState.Modified;
+
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PrestamoExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("Denegar")]
+        public async Task<ActionResult<Prestamo>> DenegarPrestamo([FromForm] Prestamo prestamo)
+        {
+            prestamo.Aprobado = false;
+            prestamo.Denegado = true;
+
+
+            _context.Prestamos.Add(prestamo);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetPrestamo", new { id = prestamo.Id }, prestamo);
+        }
+
+        [Authorize]
+        [HttpPost("Devolver")]
+        public async Task<ActionResult<Prestamo>> DevolverPrestamo([FromForm] Prestamo prestamo)
+        {
+            prestamo.Devuelto = true;
+            prestamo.
+
+
             _context.Prestamos.Add(prestamo);
             await _context.SaveChangesAsync();
 
