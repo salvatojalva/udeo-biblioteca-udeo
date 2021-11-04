@@ -44,6 +44,27 @@ namespace BibliotecaUDEO.Controllers
             return documentoItem;
         }
 
+        // GET: api/DocumentoItem/Documento/5
+        //[Authorize]
+        [HttpGet("Documento/{id}")]
+        public async Task<ActionResult<DocumentoItem>> GetDocumentoItemDocumento(int id)
+        {
+            var documentoItem = await _context.DocumentoItems
+                .Where(item => item.Activo == true && item.DocumentoId == id)
+                .ToListAsync();
+
+            if (documentoItem == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new
+            {
+                
+                resul = documentoItem
+            });
+        }
+
         // PUT: api/DocumentoItem/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]

@@ -294,13 +294,17 @@ namespace BibliotecaUDEO.Models
 
                 entity.Property(e => e.Devuelto).HasColumnName("devuelto");
 
-                entity.Property(e => e.Devuelto).HasColumnName("aprobado");
+                entity.Property(e => e.Aprobado).HasColumnName("aprobado");
 
-                entity.Property(e => e.Devuelto).HasColumnName("denegado");
+                entity.Property(e => e.EsDigital).HasColumnName("es_digital");
+
+                entity.Property(e => e.Denegado).HasColumnName("denegado");
 
                 entity.Property(e => e.DiasAtraso).HasColumnName("dias_atraso");
 
                 entity.Property(e => e.DocumentoItemId).HasColumnName("documento_item_id");
+
+                entity.Property(e => e.DocumentoId).HasColumnName("documento_id");
 
                 entity.Property(e => e.FechaFin)
                     .HasColumnType("date")
@@ -310,7 +314,7 @@ namespace BibliotecaUDEO.Models
                     .HasColumnType("date")
                     .HasColumnName("fecha_inicio");
 
-                entity.Property(e => e.FechaInicio)
+                entity.Property(e => e.FechaDevolucion)
                     .HasColumnType("date")
                     .HasColumnName("fecha_devolucion");
 
@@ -329,6 +333,11 @@ namespace BibliotecaUDEO.Models
                     .HasForeignKey(d => d.UsuarioId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_93");
+
+                entity.HasOne(d => d.Documento)
+                    .WithMany(p => p.PrestamoDocumentos)
+                    .HasForeignKey(d => d.DocumentoId);
+
             });
 
             modelBuilder.Entity<Sede>(entity =>

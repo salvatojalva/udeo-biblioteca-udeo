@@ -12,6 +12,7 @@ namespace BibliotecaUDEO.Models
             AutorDocumentos = new HashSet<AutorDocumento>();
             DocumentoItems = new HashSet<DocumentoItem>();
             TagDocumentos = new HashSet<TagDocumento>();
+            PrestamoDocumentos = new HashSet<Prestamo>();
         }
 
         public int Id { get; set; }
@@ -36,5 +37,6 @@ namespace BibliotecaUDEO.Models
         public virtual ICollection<AutorDocumento> AutorDocumentos { get; set; }
         public virtual ICollection<DocumentoItem> DocumentoItems { get; set; }
         public virtual ICollection<TagDocumento> TagDocumentos { get; set; }
+        public virtual ICollection<Prestamo> PrestamoDocumentos { get; set; }
     }
 }

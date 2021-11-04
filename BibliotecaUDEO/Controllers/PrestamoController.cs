@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaUDEO.Models;
 using Microsoft.AspNetCore.Authorization;
+using BibliotecaUDEO.Requests;
 
 namespace BibliotecaUDEO.Controllers
 {
@@ -67,7 +68,52 @@ namespace BibliotecaUDEO.Controllers
             });
         }
 
-        [Authorize]
+
+        // GET: api/Prestamo/PorAprobar
+        //[Authorize]
+        [HttpGet("PorAprobar")]
+        public async Task<ActionResult<Prestamo>> PorAprobar([FromQuery]  int? page, int? records)
+        {
+            int _page = page ?? 1;
+            int _records = records ?? 1;
+            int total_page;
+            int totalCount;
+            List<Prestamo> prestamo = new List<Prestamo>();
+
+            
+                decimal total_records = await _context.Prestamos
+                    .Where(
+                        x => x.Aprobado == false && 
+                        x.Denegado == false &&
+                        x.DocumentoItemId == null
+                    )
+                    .CountAsync();
+
+
+                totalCount = Convert.ToInt32(total_records);
+                total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
+                prestamo = await _context.Prestamos
+                    .Include(x => x.Documento)
+                    .Include(x => x.Usuario)
+                    .Where(
+                        x => x.Aprobado == false &&
+                        x.Denegado == false &&
+                        x.DocumentoItemId == null
+                    )
+                    .Skip((_page - 1) * _records).Take(_records).ToListAsync();
+            
+            
+
+            return Ok(new
+            {
+                current_page = _page,
+                totalCount = totalCount,
+                resul = prestamo
+            });
+        }
+
+        // GET: api/Prestamo/FechaFin
+        //[Authorize]
         [HttpGet("FechaFin")]
         public async Task<ActionResult<Prestamo>> Get([FromQuery] int UsuarioID, bool filterbydevuelto, int? page, int? records)
         {
@@ -78,14 +124,21 @@ namespace BibliotecaUDEO.Controllers
             List<Prestamo> prestamo = new List<Prestamo>();
 
                 decimal total_records = await _context.Prestamos
-                    .Where(usuario => usuario.UsuarioId == UsuarioID && usuario.FechaFin <= DateTime.Now)
+                    .Where(
+                        p => p.UsuarioId == UsuarioID && 
+                        p.FechaFin <= DateTime.Now  &&
+                        p.Aprobado == true && p.DocumentoItemId != null
+                    )
                     .CountAsync();
                 totalCount = Convert.ToInt32(total_records);
                 total_page = Convert.ToInt32(Math.Ceiling(total_records / _records));
             prestamo = await _context.Prestamos
-                 .Include(documentoitem => documentoitem.DocumentoItem)
-                         .ThenInclude(documento => documento.Documento)
-                         .Where(usuario => usuario.UsuarioId == UsuarioID&&usuario.FechaFin<=DateTime.Now)
+                 .Include(documento => documento.Documento)
+                         .Where(
+                                p => p.UsuarioId == UsuarioID &&
+                                p.FechaFin <= DateTime.Now &&
+                                p.Aprobado == true && p.DocumentoItemId != null
+                            )
                     .Skip((_page - 1) * _records).Take(_records).ToListAsync();
 
 
@@ -132,7 +185,10 @@ namespace BibliotecaUDEO.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Prestamo>> GetPrestamo(int id)
         {
-            var prestamo = await _context.Prestamos.FindAsync(id);
+            var prestamo = await _context.Prestamos
+                .Include(p => p.DocumentoItem)
+                .Where(p => p.Id == id)
+                .FirstOrDefaultAsync();
 
             if (prestamo == null)
             {
@@ -178,25 +234,35 @@ namespace BibliotecaUDEO.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Prestamo>> PostPrestamo([FromForm]Prestamo prestamo)
+        public async Task<ActionResult<Prestamo>> PostPrestamo(PrestamoRequest prestamoRequest)
         {
+            Prestamo prestamo = new Prestamo();
+
+            prestamo.DocumentoId = (int)prestamoRequest.DocumentoId;
+            prestamo.UsuarioId = (int)prestamoRequest.UsuarioId;
+            prestamo.EsDigital = prestamoRequest.EsDigital;
             prestamo.Aprobado = true;
             prestamo.Denegado = false;
 
             prestamo.FechaFin = new DateTime().AddDays(7);
             prestamo.FechaInicio = new DateTime();
 
-            var documentoItem = await _context.DocumentoItems.FindAsync(prestamo.DocumentoItemId);
+            var documentoItem = await _context.DocumentoItems.FirstOrDefaultAsync(x => x.Activo == true && x.EsFisico != prestamoRequest.EsDigital);
+
+            if(documentoItem == null)
+                return NotFound();
+
 
             if (documentoItem.EsFisico == true)
             {
                 documentoItem.Activo = false;
             }
-            documentoItem.NumeroPrestamos++;
-
+            prestamo.DocumentoItemId = documentoItem.Id;
 
 
             _context.Prestamos.Add(prestamo);
+            _context.Entry(documentoItem).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPrestamo", new { id = prestamo.Id }, prestamo);
@@ -206,10 +272,15 @@ namespace BibliotecaUDEO.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
         [HttpPost("Solicitar")]
-        public async Task<ActionResult<Prestamo>> SolicitarPrestamo([FromForm] Prestamo prestamo)
+        public async Task<ActionResult<Prestamo>> SolicitarPrestamo(PrestamoRequest prestamoRequest)
         {
+
+            Prestamo prestamo = new Prestamo();
             prestamo.Aprobado = false;
             prestamo.Denegado = false;
+            prestamo.DocumentoId = (int)prestamoRequest.DocumentoId;
+            prestamo.UsuarioId = (int)prestamoRequest.UsuarioId;
+            prestamo.EsDigital = prestamoRequest.EsDigital;
 
             _context.Prestamos.Add(prestamo);
             await _context.SaveChangesAsync();
@@ -220,28 +291,35 @@ namespace BibliotecaUDEO.Controllers
 
 
         [Authorize]
-        [HttpPost("Aprobar")]
+        [HttpPost("Aprobar/{id}")]
 
-        public async Task<IActionResult> AprobarPrestamo(int id, Prestamo prestamo)
+        public async Task<IActionResult> AprobarPrestamo(int id, PrestamoRequest prestamoRequest)
         {
-            if (id != prestamo.Id)
+            var prestamo = await _context.Prestamos.FindAsync(id);
+
+            if (prestamo == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+
+
+            prestamo.FechaFin = new DateTime().AddDays(7);
+            prestamo.FechaInicio = new DateTime();
 
             prestamo.Aprobado = true;
             prestamo.Denegado = false;
-
             
-
-            var documentoItem = await _context.DocumentoItems.FindAsync(prestamo.DocumentoItemId);
+            var documentoItem = await _context.DocumentoItems.FirstOrDefaultAsync(x => x.Activo == true && x.EsFisico != prestamo.EsDigital);
 
             if (documentoItem.EsFisico == true)
             {
                 documentoItem.Activo = false;
             }
 
+            prestamo.DocumentoItemId = documentoItem.Id;
+
             documentoItem.NumeroPrestamos++;
+
 
             _context.Entry(documentoItem).State = EntityState.Modified;
 
@@ -251,6 +329,8 @@ namespace BibliotecaUDEO.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                return Ok(new { result = prestamo });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -268,31 +348,56 @@ namespace BibliotecaUDEO.Controllers
         }
 
         [Authorize]
-        [HttpPost("Denegar")]
-        public async Task<ActionResult<Prestamo>> DenegarPrestamo([FromForm] Prestamo prestamo)
+        [HttpPost("Denegar/{id}")]
+        public async Task<ActionResult<Prestamo>> DenegarPrestamo(int id)
         {
+            var prestamo = await _context.Prestamos.FindAsync(id);
+
+            if (prestamo == null)
+            {
+                return NotFound();
+            }
+
             prestamo.Aprobado = false;
             prestamo.Denegado = true;
 
 
-            _context.Prestamos.Add(prestamo);
+            _context.Entry(prestamo).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPrestamo", new { id = prestamo.Id }, prestamo);
+            return Ok(new { result = prestamo });
         }
 
         [Authorize]
         [HttpPost("Devolver")]
-        public async Task<ActionResult<Prestamo>> DevolverPrestamo([FromForm] Prestamo prestamo)
+        public async Task<ActionResult<Prestamo>> DevolverPrestamo(int id)
         {
+
+            var prestamo = await _context.Prestamos.FindAsync(id);
+
+            if (prestamo == null)
+            {
+                return NotFound();
+            }
+
             prestamo.Devuelto = true;
-            prestamo.
 
+            var documentoItem = await _context.DocumentoItems.FindAsync(prestamo.DocumentoItemId);
 
-            _context.Prestamos.Add(prestamo);
+            if (documentoItem.EsFisico == true)
+            {
+                documentoItem.Activo = true;
+                prestamo.FechaDevolucion = new DateTime();
+            }
+
+            _context.Entry(documentoItem).State = EntityState.Modified;
+
+            _context.Entry(prestamo).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPrestamo", new { id = prestamo.Id }, prestamo);
+            return Ok(new { result = prestamo });
         }
 
         // DELETE: api/Prestamo/5
