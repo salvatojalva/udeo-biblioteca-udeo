@@ -44,8 +44,8 @@ namespace BibliotecaUDEO.Controllers
 
             GoogleJsonWebSignature.Payload payload = GoogleJsonWebSignature.ValidateAsync(data.IdToken, settings).Result;
 
-            //if(payload.HostedDomain != "udeo.edu.gt")
-                //return Unauthorized(new { Ok = false,  Code = 403, Message = "Tu correo no pertenese a la organizacion"});
+            if(payload.HostedDomain != "udeo.edu.gt")
+                return Unauthorized(new { Ok = false,  Code = 403, Message = "Tu correo no pertenese a la organizacion"});
 
             var find_usuario = await  _context.Usuarios.Where(x => x.GoogleId == payload.Email).FirstOrDefaultAsync();
 
